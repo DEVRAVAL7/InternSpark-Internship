@@ -1,0 +1,56 @@
+#include <AFMotor.h>
+
+// Single motor on M1
+AF_DCMotor motor1(1);
+
+// Ultrasonic pins
+#define trigPin 2
+#define echoPin 3
+
+long duration;
+int distance;
+
+void setup() {
+  Serial.begin(9600);
+
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+
+  motor1.setSpeed(180);   // PWM speed
+  motor1.run(RELEASE);   // Motor OFF initially
+}
+
+void loop() {
+  distance = getDistance();
+
+  if (distance > 15) {
+    motor1.run(FORWARD);
+    Serial.print("Distance: ");
+    Serial.print(distance);
+    Serial.println(" cm | MOTOR: ON");
+  }
+  else {
+    motor1.run(RELEASE);
+    Serial.print("Distance: ");
+    Serial.print(distance);
+    Serial.println(" cm | MOTOR: OFF");
+  }
+
+  delay(300);
+}
+
+// Ultrasonic distance function
+int getDistance() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  duration = pulseIn(echoPin, HIGH, 25000);
+  int dist = duration * 0.034 / 2;
+
+  if (dist == 0) return 100;  // no object detected
+  return dist;
+}
